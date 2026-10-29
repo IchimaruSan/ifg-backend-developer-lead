@@ -1,4 +1,4 @@
-# IFG Technical Test — Question 2: Marketplace Checkout BPMN
+# Technical Test — Question 2: Marketplace Checkout BPMN
 
 Java 17 + Quarkus 3.15.3 + BPMN workflow example.
 

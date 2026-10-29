@@ -1,4 +1,4 @@
-# IFG Technical Test — Question 1: Kafka Transaction Processor
+# Technical Test — Question 1: Kafka Transaction Processor
 
 A Java 17 + Quarkus service that consumes transaction events from Kafka, validates and transforms the data, and stores the processed result in PostgreSQL.
 
@@ -88,15 +88,6 @@ The unit tests verify the calculation and basic validation rules without requiri
 ### `GET /transactions`
 
 Returns all processed transaction records as JSON. Intended for local test/demo use.
-
-## Reliability notes
-
-- `eventId` is the idempotency key; a duplicate delivery is ignored if its record already exists.
-- The incoming connector is configured with a dead-letter queue topic (`transactions-in-dlq`) for messages that fail processing.
-- PostgreSQL writes are transactional.
-- Kafka consumption and the database commit are not one distributed atomic transaction. For production-grade delivery guarantees, consider a carefully designed retry/DLQ policy and an inbox/outbox strategy as appropriate.
-- `quarkus.hibernate-orm.database.generation=update` is convenient for a technical-test demo. Production deployments should use versioned database migrations.
-- Credentials in `application.properties` and `docker-compose.yml` are local demo credentials only; do not use them in production.
 
 ## Repository layout
 

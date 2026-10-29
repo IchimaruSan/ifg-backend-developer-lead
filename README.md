@@ -1,6 +1,4 @@
-# IFG Backend Developer Lead — Technical Assessment
-
-This repository contains my solutions for the technical assessment for the Backend Developer Lead position at IFG.
+# Backend Developer Lead — Technical Assessment
 
 The assessment consists of two independent projects demonstrating backend development, event-driven data processing, and business process orchestration using Java and the Quarkus ecosystem.
 
@@ -50,8 +48,3 @@ For the BPMN workflow, service descriptions, setup instructions, and testing pro
 Each project is maintained independently and has its own configuration, dependencies, and test procedures.
 
 Please refer to the README in each project directory for the required prerequisites and instructions to build, run, and test the implementation.
-
-## Submission
-
-This repository is prepared as the submission for the IFG Backend Developer Lead technical assessment.
-
