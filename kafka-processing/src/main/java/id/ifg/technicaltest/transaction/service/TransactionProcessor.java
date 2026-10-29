@@ -10,7 +10,6 @@ import java.util.Locale;
 
 @ApplicationScoped
 public class TransactionProcessor {
-    // Demo business rule: service fee is 2% of the transaction amount.
     private static final BigDecimal FEE_RATE = new BigDecimal("0.02");
 
     public ProcessedTransaction process(TransactionEvent event) {
