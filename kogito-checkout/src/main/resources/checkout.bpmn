@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    id="Definitions_Checkout"
+    targetNamespace="http://www.example.org/checkout">
+
+    <!-- Java data types -->
+    <bpmn:itemDefinition
+        id="ItemDefinition_CheckoutRequest"
+        structureRef="com.ifg.assessment.checkout.CheckoutRequest"/>
+
+    <bpmn:itemDefinition
+        id="ItemDefinition_Boolean"
+        structureRef="java.lang.Boolean"/>
+
+    <bpmn:process
+        id="checkout"
+        name="Marketplace Checkout"
+        isExecutable="true">
+
+        <!-- Process variables -->
+        <bpmn:property
+            id="checkoutRequest"
+            name="checkoutRequest"
+            itemSubjectRef="ItemDefinition_CheckoutRequest"/>
+
+        <!-- Start -->
+        <bpmn:startEvent
+            id="StartEvent_1"
+            name="Checkout Requested">
+            <bpmn:outgoing>Flow_1</bpmn:outgoing>
+        </bpmn:startEvent>
+
+        <!-- Validate checkout -->
+        <bpmn:serviceTask
+            id="ValidateCheckout"
+            name="Validate Checkout"
+            implementation="Java"
+            operationRef="Operation_ValidateCheckout">
+
+            <bpmn:ioSpecification>
+                <bpmn:dataInput
+                    id="Input_ValidateCheckout"
+                    name="request"
+                    itemSubjectRef="ItemDefinition_CheckoutRequest"/>
+                <bpmn:inputSet>
+                    <bpmn:dataInputRefs>Input_ValidateCheckout</bpmn:dataInputRefs>
+                </bpmn:inputSet>
+            </bpmn:ioSpecification>
+
+            <bpmn:dataInputAssociation>
+                <bpmn:sourceRef>checkoutRequest</bpmn:sourceRef>
+                <bpmn:targetRef>Input_ValidateCheckout</bpmn:targetRef>
+            </bpmn:dataInputAssociation>
+
+            <bpmn:incoming>Flow_1</bpmn:incoming>
+            <bpmn:outgoing>Flow_2</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <!-- Payment decision -->
+        <bpmn:exclusiveGateway
+            id="PaymentGateway"
+            name="Payment Approved?"
+            gatewayDirection="Diverging"
+            default="Flow_Rejected">
+
+            <bpmn:incoming>Flow_2</bpmn:incoming>
+            <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+            <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+        </bpmn:exclusiveGateway>
+
+        <!-- Approved path -->
+        <bpmn:serviceTask
+            id="CompleteOrder"
+            name="Complete Order"
+            implementation="Java"
+            operationRef="Operation_CompleteOrder">
+
+            <bpmn:ioSpecification>
+                <bpmn:dataInput
+                    id="Input_CompleteOrder"
+                    name="request"
+                    itemSubjectRef="ItemDefinition_CheckoutRequest"/>
+                <bpmn:inputSet>
+                    <bpmn:dataInputRefs>Input_CompleteOrder</bpmn:dataInputRefs>
+                </bpmn:inputSet>
+            </bpmn:ioSpecification>
+
+            <bpmn:dataInputAssociation>
+                <bpmn:sourceRef>checkoutRequest</bpmn:sourceRef>
+                <bpmn:targetRef>Input_CompleteOrder</bpmn:targetRef>
+            </bpmn:dataInputAssociation>
+
+            <bpmn:incoming>Flow_Approved</bpmn:incoming>
+            <bpmn:outgoing>Flow_CompleteEnd</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <bpmn:endEvent
+            id="EndEvent_Completed"
+            name="Order Completed">
+            <bpmn:incoming>Flow_CompleteEnd</bpmn:incoming>
+        </bpmn:endEvent>
+
+        <!-- Rejected path -->
+        <bpmn:serviceTask
+            id="RejectOrder"
+            name="Reject Order"
+            implementation="Java"
+            operationRef="Operation_RejectOrder">
+
+            <bpmn:ioSpecification>
+                <bpmn:dataInput
+                    id="Input_RejectOrder"
+                    name="request"
+                    itemSubjectRef="ItemDefinition_CheckoutRequest"/>
+                <bpmn:inputSet>
+                    <bpmn:dataInputRefs>Input_RejectOrder</bpmn:dataInputRefs>
+                </bpmn:inputSet>
+            </bpmn:ioSpecification>
+
+            <bpmn:dataInputAssociation>
+                <bpmn:sourceRef>checkoutRequest</bpmn:sourceRef>
+                <bpmn:targetRef>Input_RejectOrder</bpmn:targetRef>
+            </bpmn:dataInputAssociation>
+
+            <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+            <bpmn:outgoing>Flow_RejectEnd</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <bpmn:endEvent
+            id="EndEvent_Rejected"
+            name="Order Rejected">
+            <bpmn:incoming>Flow_RejectEnd</bpmn:incoming>
+        </bpmn:endEvent>
+
+        <!-- Sequence flows -->
+        <bpmn:sequenceFlow
+            id="Flow_1"
+            sourceRef="StartEvent_1"
+            targetRef="ValidateCheckout"/>
+
+        <bpmn:sequenceFlow
+            id="Flow_2"
+            sourceRef="ValidateCheckout"
+            targetRef="PaymentGateway"/>
+
+        <bpmn:sequenceFlow
+            id="Flow_Approved"
+            name="Approved"
+            sourceRef="PaymentGateway"
+            targetRef="CompleteOrder">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
+				checkoutRequest.paymentApproved == true
+			</bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+        <bpmn:sequenceFlow
+            id="Flow_Rejected"
+            name="Rejected"
+            sourceRef="PaymentGateway"
+            targetRef="RejectOrder"/>
+
+        <bpmn:sequenceFlow
+            id="Flow_CompleteEnd"
+            sourceRef="CompleteOrder"
+            targetRef="EndEvent_Completed"/>
+
+        <bpmn:sequenceFlow
+            id="Flow_RejectEnd"
+            sourceRef="RejectOrder"
+            targetRef="EndEvent_Rejected"/>
+
+    </bpmn:process>
+
+    <!-- Java service interface -->
+    <bpmn:interface
+        id="CheckoutServiceInterface"
+        name="com.ifg.assessment.checkout.CheckoutService"
+        implementationRef="com.ifg.assessment.checkout.CheckoutService">
+
+        <bpmn:operation
+            id="Operation_ValidateCheckout"
+            name="validateCheckout"
+            implementationRef="validateCheckout">
+            <bpmn:inMessageRef>Message_ValidateCheckout</bpmn:inMessageRef>
+        </bpmn:operation>
+
+        <bpmn:operation
+            id="Operation_CompleteOrder"
+            name="completeOrder"
+            implementationRef="completeOrder">
+            <bpmn:inMessageRef>Message_CompleteOrder</bpmn:inMessageRef>
+        </bpmn:operation>
+
+        <bpmn:operation
+            id="Operation_RejectOrder"
+            name="rejectOrder"
+            implementationRef="rejectOrder">
+            <bpmn:inMessageRef>Message_RejectOrder</bpmn:inMessageRef>
+        </bpmn:operation>
+    </bpmn:interface>
+
+    <!-- Operation messages -->
+    <bpmn:message
+        id="Message_ValidateCheckout"
+        itemRef="ItemDefinition_CheckoutRequest"/>
+
+    <bpmn:message
+        id="Message_CompleteOrder"
+        itemRef="ItemDefinition_CheckoutRequest"/>
+
+    <bpmn:message
+        id="Message_RejectOrder"
+        itemRef="ItemDefinition_CheckoutRequest"/>
+
+</bpmn:definitions>

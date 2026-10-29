@@ -1,0 +1,8 @@
+{
+  "checkoutRequest": {
+    "orderId": "ORD-1001",
+    "customerId": "CUS-1001",
+    "totalAmount": 125000.00,
+    "paymentApproved": true
+  }
+}
